@@ -21,5 +21,5 @@ window.INVITATION = {
   ticketLabel: "Register on Ticketmaster",
   dietaryNote: "Dietary requirements and guest details are collected when you register.",
 
-  contactEmail: "[NEEDS INPUT: contact email]",
+  contactEmail: "maria.alnajem@armada.nu",
 };

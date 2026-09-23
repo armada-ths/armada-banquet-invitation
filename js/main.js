@@ -38,7 +38,8 @@
 
   if (missing.size) {
     const banner = document.getElementById("draft-banner");
-    banner.textContent = `Draft: ${missing.size} field${missing.size === 1 ? "" : "s"} still need input in js/config.js`;
+    const one = missing.size === 1;
+    banner.textContent = `Draft: ${missing.size} field${one ? "" : "s"} still need${one ? "s" : ""} input in js/config.js`;
     banner.hidden = false;
     console.warn("Invitation fields still needing input:", [...missing]);
   }
