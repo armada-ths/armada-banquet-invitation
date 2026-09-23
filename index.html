@@ -267,8 +267,20 @@
       <svg class="ink-stamp card-stamp" viewBox="0 0 100 100" aria-hidden="true">
         <defs>
           <!-- A zig-zag pen stroke; animating its dash "scribbles" the stamp in. -->
-          <mask id="stampScribble" maskUnits="userSpaceOnUse" x="-10" y="-10" width="120" height="120">
-            <path class="scribble" d="M4 38L38 4L12 64L64 12L18 84L84 18L34 96L96 34L58 98L98 58L84 88" fill="none" stroke="#fff" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="0"/>
+          <!-- Rough, torn edges for the chipped bits of the rubber -->
+          <filter id="stampChip" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="fractalNoise" baseFrequency=".18" numOctaves="3" seed="6"/>
+            <feDisplacementMap in="SourceGraphic" scale="7" xChannelSelector="R" yChannelSelector="G"/>
+          </filter>
+          <mask id="stampScribble" maskUnits="userSpaceOnUse" x="-20" y="-20" width="140" height="140">
+            <path class="scribble" d="M-6 30L30 -6L-6 58L58 -6L-2 84L84 -2L10 104L104 10L36 108L108 36L66 108L108 66L92 100" fill="none" stroke="#fff" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="0"/>
+            <!-- Wear and damage: a chipped notch, an edge nick, a hairline crack and a worn patch -->
+            <g filter="url(#stampChip)">
+              <path d="M44 -2L60 -2L55 9L51 16L48 7Z" fill="#000"/>
+              <path d="M-2 50L8 53L11 57L6 60L-2 64Z" fill="#000"/>
+              <path d="M57 10L60 19L66 25L68 34" fill="none" stroke="#000" stroke-width="1.6"/>
+              <ellipse cx="76" cy="78" rx="9" ry="5" transform="rotate(-30 76 78)" fill="#000" opacity=".55"/>
+            </g>
           </mask>
         </defs>
         <g mask="url(#stampScribble)"><use href="#inkStamp" width="100" height="100"/></g>
