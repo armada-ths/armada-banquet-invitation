@@ -735,13 +735,9 @@ a.venue-address[href] {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Little paper ticket, slightly tilted as if just handed over */
 .cta-icon {
   flex: none;
-  margin: -4px 0;
-  transform: rotate(-9deg);
-  filter: drop-shadow(0 1.5px 1.5px rgba(8, 18, 50, 0.45));
-  transition: transform 0.2s ease;
+  margin: -3px 0;
 }
 
 .cta > span {
@@ -754,10 +750,6 @@ a.venue-address[href] {
     padding-left: 20px;
     padding-right: 20px;
   }
-}
-
-.cta[href]:hover .cta-icon {
-  transform: rotate(-3deg) translateY(-1px);
 }
 
 .cta[href]:hover {
