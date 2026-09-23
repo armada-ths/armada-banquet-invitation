@@ -91,7 +91,7 @@
 
     {
       // Order: card rises, "Armada" is written, then "Grand Banquet", then the details,
-      // and finally the stamp is pressed onto the paper.
+      // and finally the stamp is scribbled in.
       const kicker = dialog.querySelector(".kicker");
       const details = [...dialog.querySelectorAll(".reveal")].filter((el) => el !== kicker);
 
@@ -99,10 +99,10 @@
       tl.fromTo(dialog, { opacity: 0, y: 90, scale: 0.88 }, { opacity: 1, y: 0, scale: 1, duration: 1.1, ease: "expo.out" }, 0)
         .from(kicker, { opacity: 0, y: 10, duration: 0.7, ease: "power3.out" }, 0.25)
         .set(details, { opacity: 0, y: 16 }, 0)
-        .set(".card-stamp", { opacity: 0 }, 0);
+        .set(".card-stamp .scribble", { strokeDashoffset: 100 }, 0);
       traceTitle(tl, 0.5);
       tl.to(details, { opacity: 1, y: 0, duration: 0.8, stagger: 0.07, ease: "power3.out" }, ">-0.15")
-        .fromTo(".card-stamp", { scale: 1.7, opacity: 0, rotation: -12 }, { scale: 1, opacity: 0.85, rotation: -12, duration: 0.32, ease: "power4.in" }, ">-0.3");
+        .to(".card-stamp .scribble", { strokeDashoffset: 0, duration: 1, ease: "power1.inOut" }, ">-0.3");
     }
   }
 
