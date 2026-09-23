@@ -117,7 +117,7 @@
     return null;
   }
 
-  function createEnvelope(btn, { reducedMotion = false, onOpen, onHint }) {
+  function createEnvelope(btn, { reducedMotion = false, startOpen = false, onOpen, onHint }) {
     const envelope = btn.querySelector(".envelope");
     const ice = btn.querySelector(".ice");
     const cracksSvg = btn.querySelector(".cracks");
@@ -278,6 +278,20 @@
         setTimeout(shatter, 450);
       }
     });
+
+    // Returning visitor: the ice is already broken. Open the flap and slide the letter
+    // out on its own, then wait for a tap to show the card.
+    if (startOpen) {
+      opened = true;
+      ice.classList.add("gone");
+      onHint("Tap to view your invitation");
+      setTimeout(() => {
+        envelope.classList.add("flap-open");
+        document.body.classList.add("envelope-open");
+      }, reducedMotion ? 0 : 900);
+      setTimeout(() => envelope.classList.add("letter-out"), reducedMotion ? 0 : 1600);
+      return;
+    }
 
     onHint(HINTS[0]);
   }

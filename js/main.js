@@ -70,16 +70,38 @@
     tl.set({}, {}, t + 0.3); // let the last letter finish filling before moving on
   }
 
+  // The full reveal plays once. After that (reopening, or coming back another day) the
+  // card simply fades up with everything already written. `?replay` shows it all again.
+  const SEEN_KEY = "armada-invite-opened";
+  const storage = {
+    get() { try { return localStorage.getItem(SEEN_KEY) === "1"; } catch { return false; } },
+    set() { try { localStorage.setItem(SEEN_KEY, "1"); } catch { /* private mode etc. */ } },
+    clear() { try { localStorage.removeItem(SEEN_KEY); } catch { /* ignore */ } },
+  };
+  if (new URLSearchParams(location.search).has("replay")) storage.clear();
+  const returning = storage.get();
+  let fullReveal = null;
+
   function openCard() {
     dialog.showModal();
     document.body.classList.add("revealed");
-    if (gsap) {
+    const seen = returning || fullReveal;
+    storage.set();
+    if (!gsap) return;
+
+    if (seen) {
+      if (fullReveal) fullReveal.progress(1); // finish the first reveal if it's still running
+      gsap.fromTo(dialog, { opacity: 0, y: 28, scale: 0.97 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "power3.out" });
+      return;
+    }
+
+    {
       // Order: card rises, "Armada" is written, then "Grand Banquet", then the details,
       // and finally the stamp is pressed onto the paper.
       const kicker = dialog.querySelector(".kicker");
       const details = [...dialog.querySelectorAll(".reveal")].filter((el) => el !== kicker);
 
-      const tl = gsap.timeline();
+      const tl = (fullReveal = gsap.timeline());
       tl.fromTo(dialog, { opacity: 0, y: 90, scale: 0.88 }, { opacity: 1, y: 0, scale: 1, duration: 1.1, ease: "expo.out" }, 0)
         .from(kicker, { opacity: 0, y: 10, duration: 0.7, ease: "power3.out" }, 0.25)
         .set(details, { opacity: 0, y: 16 }, 0)
@@ -92,6 +114,7 @@
 
   createEnvelope(btn, {
     reducedMotion,
+    startOpen: returning,
     onOpen: openCard,
     onHint: (text) => (hint.textContent = text),
   });
