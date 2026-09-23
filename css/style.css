@@ -548,16 +548,6 @@ body.envelope-open .heading {
   background: rgba(14, 26, 58, 0.12);
 }
 
-.card h1 .t-line {
-  display: block;
-}
-
-/* Mrs Saint Delafield's capital G is hard to read, so borrow a clearer one. */
-.cap-g {
-  font-family: "Great Vibes", cursive;
-  font-size: 0.8em;
-}
-
 .kicker {
   margin: 0 0 clamp(4px, 1svh, 10px);
   font-family: var(--engraved);
@@ -567,23 +557,17 @@ body.envelope-open .heading {
   color: var(--muted);
 }
 
-/* Title handwritten in frosted ice-blue ink. */
+/* Title: handwritten letters as SVG outlines (tools/make_title_svg.py), traced in on open. */
 .card h1 {
+  margin: 0 0 clamp(2px, 0.6svh, 6px);
+  line-height: 0;
+}
+
+.title-art {
   display: inline-block;
-  margin: 0;
-  padding: 0.1em 0.35em 0.05em;
-  font-family: "Mrs Saint Delafield", "Cormorant Garamond", cursive;
-  font-weight: 400;
-  font-size: clamp(2.2rem, min(10vw, 6.2svh), 4rem);
-  line-height: 1.02;
-  white-space: nowrap;
-  background:
-    linear-gradient(rgba(20, 50, 95, 0.35), rgba(20, 50, 95, 0.35)),
-    url("../assets/frost.webp") center / 220px auto,
-    linear-gradient(120deg, #3a6fae 0%, #173e78 40%, #4a82c4 65%, #16386e 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  height: calc(2.2 * clamp(2.2rem, min(10vw, 6.2svh), 4rem));
+  max-width: 100%;
+  overflow: visible;
   filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.9)) drop-shadow(0 0 6px rgba(150, 200, 245, 0.45));
 }
 

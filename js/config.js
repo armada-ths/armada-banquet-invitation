@@ -2,7 +2,8 @@
 // is shown with a red dashed outline on the page and listed in the console,
 // so a half-filled invitation can't go out unnoticed.
 window.INVITATION = {
-  eventName: "Armada Grand Banquet",
+  // The handwritten card title ("Armada Grand Banquet") is pre-rendered as SVG by
+  // tools/make_title_svg.py; change the text there and re-run it.
   tagline: "An Evening Carved in Ice",
   intro: "We would be delighted to have you join us for an unforgettable winter evening.",
 

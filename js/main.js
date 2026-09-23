@@ -18,27 +18,6 @@
     if (isPlaceholder(value)) markMissing(el, key);
   });
 
-  // Handwritten title: first word on its own line above the rest ("Armada" / "Grand Banquet").
-  // The script font's capital G is hard to read, so it's swapped for a clearer one.
-  const title = document.getElementById("inv-title");
-  if (!isPlaceholder(cfg.eventName)) {
-    const [first, ...rest] = cfg.eventName.trim().split(/\s+/);
-    title.setAttribute("aria-label", cfg.eventName);
-    title.replaceChildren(...[first, rest.join(" ")].filter(Boolean).map((text) => {
-      const line = document.createElement("span");
-      line.className = "t-line";
-      line.setAttribute("aria-hidden", "true");
-      for (const part of text.split(/(G)/)) {
-        if (part !== "G") { line.append(part); continue; }
-        const g = document.createElement("span");
-        g.className = "cap-g";
-        g.textContent = "G";
-        line.append(g);
-      }
-      return line;
-    }));
-  }
-
   const ticket = document.getElementById("ticket-link");
   if (isPlaceholder(cfg.ticketUrl) || !/^https:\/\//i.test(cfg.ticketUrl)) {
     ticket.removeAttribute("href");
@@ -71,6 +50,26 @@
   const hint = document.getElementById("hint");
   const dialog = document.getElementById("invitation");
 
+  // Hand-trace the title: each letter's outline is drawn like a pen stroke, then its ink
+  // fills in. Letters go one after another, "Armada" first, then "Grand Banquet".
+  function traceTitle(tl, at) {
+    const lines = [...dialog.querySelectorAll(".title-art .title-line")];
+    let t = at;
+    lines.forEach((line, i) => {
+      if (i > 0) t += 0.15; // brief lift of the pen between lines
+      for (const path of line.querySelectorAll("path")) {
+        const len = path.getTotalLength();
+        const draw = Math.min(Math.max(len / 900, 0.14), 0.5);
+        tl.fromTo(path,
+          { strokeDasharray: len, strokeDashoffset: len, fillOpacity: 0 },
+          { strokeDashoffset: 0, duration: draw, ease: "power1.inOut" }, t)
+          .to(path, { fillOpacity: 1, duration: 0.35, ease: "power1.out" }, t + draw * 0.7);
+        t += draw * 0.72; // overlap letters slightly so the writing flows
+      }
+    });
+    tl.set({}, {}, t + 0.3); // let the last letter finish filling before moving on
+  }
+
   function openCard() {
     dialog.showModal();
     document.body.classList.add("revealed");
@@ -79,18 +78,13 @@
       // and finally the stamp is pressed onto the paper.
       const kicker = dialog.querySelector(".kicker");
       const details = [...dialog.querySelectorAll(".reveal")].filter((el) => el !== kicker);
-      const [lineOne, lineTwo] = dialog.querySelectorAll(".card h1 .t-line");
-      // Negative top/bottom insets so the script's tall flourishes aren't clipped.
-      const hidden = { clipPath: "inset(-40% 100% -40% -10%)" };
-      const written = { clipPath: "inset(-40% -10% -40% -10%)", ease: "power2.inOut" };
 
       const tl = gsap.timeline();
       tl.fromTo(dialog, { opacity: 0, y: 90, scale: 0.88 }, { opacity: 1, y: 0, scale: 1, duration: 1.1, ease: "expo.out" }, 0)
         .from(kicker, { opacity: 0, y: 10, duration: 0.7, ease: "power3.out" }, 0.25)
         .set(details, { opacity: 0, y: 16 }, 0)
         .set(".card-stamp", { opacity: 0 }, 0);
-      if (lineOne) tl.fromTo(lineOne, hidden, { ...written, duration: 1.1 }, 0.5);
-      if (lineTwo) tl.fromTo(lineTwo, hidden, { ...written, duration: 1.4 }, ">-0.1");
+      traceTitle(tl, 0.5);
       tl.to(details, { opacity: 1, y: 0, duration: 0.8, stagger: 0.07, ease: "power3.out" }, ">-0.15")
         .fromTo(".card-stamp", { scale: 1.7, opacity: 0, rotation: -12 }, { scale: 1, opacity: 0.85, rotation: -12, duration: 0.32, ease: "power4.in" }, ">-0.3");
     }
