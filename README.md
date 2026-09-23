@@ -32,7 +32,7 @@ python -m http.server 5173
 
 Then open http://localhost:5173.
 
-The full opening (breaking the ice, handwriting, stamp) plays once per browser. After that the envelope starts open and the card just fades in. Add `?replay` to the URL to see the full version again.
+The full opening (breaking the ice, handwriting, stamp) plays on every page load. If the card is closed and reopened, it just fades in with everything already written.
 
 ## Files
 

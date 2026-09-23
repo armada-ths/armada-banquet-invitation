@@ -71,27 +71,17 @@
     tl.set({}, {}, t + 0.3); // let the last letter finish filling before moving on
   }
 
-  // The full reveal plays once. After that (reopening, or coming back another day) the
-  // card simply fades up with everything already written. `?replay` shows it all again.
-  const SEEN_KEY = "armada-invite-opened";
-  const storage = {
-    get() { try { return localStorage.getItem(SEEN_KEY) === "1"; } catch { return false; } },
-    set() { try { localStorage.setItem(SEEN_KEY, "1"); } catch { /* private mode etc. */ } },
-    clear() { try { localStorage.removeItem(SEEN_KEY); } catch { /* ignore */ } },
-  };
-  if (new URLSearchParams(location.search).has("replay")) storage.clear();
-  const returning = storage.get();
+  // The full reveal plays the first time the card opens on each page load. Reopening it
+  // after closing just fades the card up with everything already written.
   let fullReveal = null;
 
   function openCard() {
     dialog.showModal();
     document.body.classList.add("revealed");
-    const seen = returning || fullReveal;
-    storage.set();
     if (!gsap) return;
 
-    if (seen) {
-      if (fullReveal) fullReveal.progress(1); // finish the first reveal if it's still running
+    if (fullReveal) {
+      fullReveal.progress(1); // finish the first reveal if it's still running
       gsap.fromTo(dialog, { opacity: 0, y: 28, scale: 0.97 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "power3.out" });
       return;
     }
@@ -115,7 +105,6 @@
 
   createEnvelope(btn, {
     reducedMotion,
-    startOpen: returning,
     onOpen: openCard,
     onHint: (text) => (hint.textContent = text),
   });
