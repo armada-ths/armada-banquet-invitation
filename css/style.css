@@ -30,6 +30,16 @@ body {
   min-height: 100%;
 }
 
+/* Rapid taps shouldn't trigger double-tap zoom (it breaks the animations).
+   Pinch-zoom still works, so the page stays accessible. */
+html,
+body,
+button,
+a,
+dialog {
+  touch-action: manipulation;
+}
+
 body {
   min-height: 100svh;
   background:
@@ -199,6 +209,10 @@ body.revealed .stage {
   cursor: pointer;
   border-radius: 20px;
   -webkit-tap-highlight-color: transparent;
+  /* no text selection or long-press menu while tapping away at the ice */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .envelope-btn:focus-visible {
