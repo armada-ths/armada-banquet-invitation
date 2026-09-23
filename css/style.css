@@ -738,6 +738,7 @@ a.venue-address[href] {
 .cta-icon {
   flex: none;
   margin: -3px 0;
+  transform: rotate(-15deg); /* tip the ticket up a little */
 }
 
 .cta > span {
