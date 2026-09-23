@@ -59,12 +59,12 @@
       if (i > 0) t += 0.15; // brief lift of the pen between lines
       for (const path of line.querySelectorAll("path")) {
         const len = path.getTotalLength();
-        const draw = Math.min(Math.max(len / 900, 0.14), 0.5);
+        const draw = Math.min(Math.max(len / 1300, 0.1), 0.35);
         tl.fromTo(path,
           { strokeDasharray: len, strokeDashoffset: len, fillOpacity: 0 },
           { strokeDashoffset: 0, duration: draw, ease: "power1.inOut" }, t)
-          .to(path, { fillOpacity: 1, duration: 0.35, ease: "power1.out" }, t + draw * 0.7);
-        t += draw * 0.72; // overlap letters slightly so the writing flows
+          .to(path, { fillOpacity: 1, duration: 0.28, ease: "power1.out" }, t + draw * 0.7);
+        t += draw * 0.65; // overlap letters slightly so the writing flows
       }
     });
     tl.set({}, {}, t + 0.3); // let the last letter finish filling before moving on
