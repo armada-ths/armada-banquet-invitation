@@ -10,6 +10,9 @@
     missing.add(key);
   }
 
+  // Optional special guest: drop the section entirely when no name is set.
+  if (!cfg.specialGuest || !cfg.specialGuest.trim()) document.getElementById("guest").remove();
+
   // Fill text fields from config.
   document.querySelectorAll("[data-field]").forEach((el) => {
     const key = el.dataset.field;

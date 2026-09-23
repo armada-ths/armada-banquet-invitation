@@ -616,6 +616,44 @@ body.envelope-open .heading {
   color: #33415f;
 }
 
+.guest {
+  margin: 0 0 clamp(10px, 2.2svh, 22px);
+}
+
+.guest p {
+  margin: 0;
+}
+
+.guest-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: clamp(2px, 0.6svh, 6px) !important;
+  font-family: var(--engraved);
+  font-weight: 600;
+  font-size: clamp(0.66rem, 1.6svh, 0.78rem);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.guest-label::before,
+.guest-label::after {
+  content: "";
+  width: 12px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.45;
+}
+
+.guest-name {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(1.15rem, 2.9svh, 1.5rem);
+  line-height: 1.15;
+}
+
 .details {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -718,6 +756,19 @@ a.venue-address[href] {
   z-index: 1;
   text-align: center;
   padding: 16px;
+}
+
+/* Short screens: tighten vertical rhythm so the whole card still fits without scrolling. */
+@media (max-height: 700px) {
+  .divider {
+    margin: 6px auto;
+  }
+  .intro {
+    margin-bottom: 8px;
+  }
+  .guest {
+    margin-bottom: 8px;
+  }
 }
 
 @media (max-width: 480px) {

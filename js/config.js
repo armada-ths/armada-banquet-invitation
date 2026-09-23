@@ -16,6 +16,10 @@ window.INVITATION = {
 
   dressCode: "Black Tie",
 
+  // Leave specialGuest empty ("") to hide the section.
+  specialGuestLabel: "Special Guest",
+  specialGuest: "Edward Blom",
+
   // Must be a full https:// link to the Ticketmaster registration page.
   ticketUrl: "[NEEDS INPUT: Ticketmaster registration URL]",
   ticketLabel: "Register on Ticketmaster",
