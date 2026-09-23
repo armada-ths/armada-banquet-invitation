@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>THS Armada Grand Banquet</title>
+  <meta name="description" content="You are invited to the THS Armada Grand Banquet, an evening carved in ice.">
+  <meta property="og:title" content="THS Armada Grand Banquet">
+  <meta property="og:description" content="You are invited to an evening carved in ice.">
+  <meta name="theme-color" content="#0b1433">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Mrs+Saint+Delafield&family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="preload" href="assets/frost.webp" as="image" type="image/webp">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js" defer></script>
+  <script src="js/config.js" defer></script>
+  <script src="js/snow.js" defer></script>
+  <script src="js/fx.js" defer></script>
+  <script src="js/envelope.js" defer></script>
+  <script src="js/main.js" defer></script>
+</head>
+<body>
+  <!-- Shared SVG paint for the envelope -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <filter id="grain" x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" stitchTiles="stitch"/>
+        <feColorMatrix type="saturate" values="0"/>
+        <feComponentTransfer><feFuncA type="linear" slope="0.22"/></feComponentTransfer>
+        <feComposite in2="SourceGraphic" operator="in"/>
+      </filter>
+      <linearGradient id="paperL" x1="0" y1="0" x2="1" y2="0.3">
+        <stop offset="0" stop-color="#23336a"/><stop offset="1" stop-color="#1a2753"/>
+      </linearGradient>
+      <linearGradient id="paperR" x1="1" y1="0" x2="0" y2="0.3">
+        <stop offset="0" stop-color="#1f2e60"/><stop offset="1" stop-color="#16224a"/>
+      </linearGradient>
+      <!-- Bottom flap: close to the side flaps' tone at its top so no false "flap edge" shows through -->
+      <linearGradient id="paperB" x1="0" y1="1" x2="0" y2="0">
+        <stop offset="0" stop-color="#1b2956"/><stop offset="1" stop-color="#22336a"/>
+      </linearGradient>
+      <linearGradient id="flapG" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#2d4178"/><stop offset="1" stop-color="#22336a"/>
+      </linearGradient>
+      <radialGradient id="iceWax" cx="0.36" cy="0.3" r="0.8">
+        <stop offset="0" stop-color="#f6fcff"/>
+        <stop offset="0.35" stop-color="#cfe8f7"/>
+        <stop offset="0.75" stop-color="#8dbde0"/>
+        <stop offset="1" stop-color="#557fb0"/>
+      </radialGradient>
+      <radialGradient id="sealShine" cx="0.5" cy="0.5" r="0.5">
+        <stop offset="0" stop-color="#fff" stop-opacity=".75"/>
+        <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+      </radialGradient>
+      <clipPath id="sealClip">
+        <path d="M50 4C62 3 70 9 79 14C88 20 95 30 96 42C98 54 95 64 90 73C84 83 74 92 62 95C50 99 38 97 28 92C18 86 9 77 6 65C2 53 4 41 9 31C15 19 25 10 37 6C42 5 46 4 50 4Z"/>
+      </clipPath>
+      <!-- Ice cracks -->
+      <filter id="crackBlur" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur stdDeviation="1.2"/>
+      </filter>
+      <radialGradient id="bruiseGrad" cx=".5" cy=".5" r=".5">
+        <stop offset="0" stop-color="#fff" stop-opacity=".95"/>
+        <stop offset=".35" stop-color="#fff" stop-opacity=".6"/>
+        <stop offset=".7" stop-color="#dcefff" stop-opacity=".22"/>
+        <stop offset="1" stop-color="#dcefff" stop-opacity="0"/>
+      </radialGradient>
+
+      <!-- The ship from the Armada logo (fill comes from the <use>) -->
+      <symbol id="ship" viewBox="100 76 106 159">
+        <path transform="matrix(1,0,0,-1,200.7193,169.0123)" d="M0 0-53.982-9.46C-53.982-9.46-55.708 13.104-39.611 42.005L5.27 45.278C5.27 45.278-19.931 18.692 0 0M-16.977-65.157H-58.333C-58.333-65.157-71.707-50.438-69.721-17.464L3.922-5.379C3.922-5.379 1.128-32.982-16.977-65.157M-73.752-11.826-100.07-1.187-73.433 68.541H-72.465ZM-38.134 92.552H-16.707C-16.707 92.552-21.268 71.355-18.912 48.821L-62.525 42.803C-62.525 42.803-52.425 73.371-38.134 92.552"/>
+      </symbol>
+
+      <!-- Rubber stamp: inked impression with patchy coverage and slightly bled edges -->
+      <filter id="inkRough" x="-8%" y="-8%" width="116%" height="116%">
+        <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="5" result="n"/>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="1.2" result="d"/>
+        <!-- large blotches where the rubber pressed lighter, plus a fine paper-grain dropout -->
+        <feTurbulence type="fractalNoise" baseFrequency=".06" numOctaves="3" seed="12" result="m"/>
+        <feColorMatrix in="m" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.6 2.2" result="blotch"/>
+        <feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="1" seed="21" result="g"/>
+        <feColorMatrix in="g" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -3 2.6" result="grain"/>
+        <feComposite in="blotch" in2="grain" operator="in" result="cover"/>
+        <feComposite in="d" in2="cover" operator="in"/>
+      </filter>
+      <mask id="stampShape" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+        <circle cx="50" cy="50" r="46" fill="#fff"/>
+        <use href="#ship" x="32" y="24" width="32.6" height="49" fill="#000"/>
+      </mask>
+      <symbol id="inkStamp" viewBox="0 0 100 100" overflow="visible">
+        <g filter="url(#inkRough)">
+          <g mask="url(#stampShape)">
+            <rect width="100" height="100" fill="#72aee3"/>
+            <image href="assets/frost.webp" x="-30" y="-5" width="160" height="106" preserveAspectRatio="xMidYMid slice" opacity=".55"/>
+            <!-- ink pools darker along the edges of the rubber -->
+            <circle cx="50" cy="50" r="45" fill="none" stroke="#3f7cc0" stroke-width="3.5" opacity=".85"/>
+            <use href="#ship" x="32" y="24" width="32.6" height="49" fill="none" stroke="#3f7cc0" stroke-width="9" opacity=".75"/>
+          </g>
+        </g>
+      </symbol>
+
+      <!-- Postage stamp (on the letter inside the envelope) -->
+      <filter id="tatter" x="-6%" y="-6%" width="112%" height="112%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="3" seed="4"/>
+        <feDisplacementMap in="SourceGraphic" scale="2.4" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+      <filter id="stampGrain" x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="7"/>
+        <feColorMatrix type="matrix" values="0 0 0 0 .42  0 0 0 0 .31  0 0 0 0 .14  0 0 0 1.3 -.45"/>
+      </filter>
+      <filter id="inkBleed" x="-10%" y="-10%" width="120%" height="120%">
+        <feTurbulence type="fractalNoise" baseFrequency=".7" numOctaves="2" seed="9" result="n"/>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="1.6" result="d"/>
+        <feTurbulence type="fractalNoise" baseFrequency=".22" seed="3" result="m"/>
+        <feColorMatrix in="m" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 1.75" result="mask"/>
+        <feComposite in="d" in2="mask" operator="in"/>
+      </filter>
+      <!-- Ragged edges come from roughening only the mask, so the artwork stays crisp. -->
+      <mask id="perf" maskUnits="userSpaceOnUse" x="-5" y="-5" width="110" height="134">
+        <g filter="url(#tatter)">
+          <rect width="100" height="124" fill="#fff"/>
+          <rect width="100" height="124" fill="none" stroke="#000" stroke-width="6" stroke-dasharray="0 7.75" stroke-linecap="round"/>
+          <polygon points="0,104 0,124 17,124 11,119 7,113 4,110" fill="#000"/>
+        </g>
+      </mask>
+      <linearGradient id="stampSky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#132250"/><stop offset=".6" stop-color="#2a4a8c"/><stop offset="1" stop-color="#5a86c0"/>
+      </linearGradient>
+      <radialGradient id="stain" cx=".5" cy=".5" r=".5">
+        <stop offset="0" stop-color="#9a7033" stop-opacity=".22"/><stop offset="1" stop-color="#9a7033" stop-opacity="0"/>
+      </radialGradient>
+      <path id="pmArc" d="M1.5 97 a18 18 0 0 1 36 0"/>
+
+      <symbol id="stamp" viewBox="0 0 100 124" overflow="visible">
+        <g mask="url(#perf)">
+          <rect width="100" height="124" fill="#efe4c6"/>
+          <rect x="9" y="9" width="82" height="106" fill="url(#stampSky)"/>
+          <path d="M9 42Q38 26 60 38T91 30V50Q62 60 40 50T9 58Z" fill="rgba(100,225,185,.32)"/>
+          <path d="M9 92Q34 83 55 90T91 85V115H9Z" fill="#e6edf6"/>
+          <use href="#ship" x="37" y="45" width="27" height="41" fill="#f6f1e2"/>
+          <g fill="#fff" opacity=".8">
+            <circle cx="19" cy="34" r="1"/><circle cx="80" cy="44" r=".9"/><circle cx="27" cy="70" r=".8"/>
+            <circle cx="74" cy="66" r="1.1"/><circle cx="64" cy="30" r=".7"/><circle cx="16" cy="54" r=".7"/>
+          </g>
+          <text x="50" y="21" text-anchor="middle" font-family="Cinzel, serif" font-size="7.4" letter-spacing="1.4" fill="#f4eedd">THS ARMADA</text>
+          <text x="14" y="32" font-family="Cinzel, serif" font-size="6" fill="#f4eedd">2026</text>
+          <text x="50" y="107" text-anchor="middle" font-family="Cinzel, serif" font-size="5.6" letter-spacing=".8" fill="#1d2f63">GRAND BANQUET</text>
+          <rect width="100" height="124" filter="url(#stampGrain)" opacity=".5"/>
+          <circle cx="78" cy="100" r="16" fill="url(#stain)"/>
+          <circle cx="22" cy="18" r="10" fill="url(#stain)"/>
+          <path d="M0 80L100 58" stroke="rgba(255,255,255,.4)" stroke-width=".7"/>
+          <path d="M0 80.9L100 58.9" stroke="rgba(0,0,0,.14)" stroke-width=".7"/>
+        </g>
+        <!-- Postmark spills over the edge onto the paper -->
+        <g filter="url(#inkBleed)" stroke="#1c2030" stroke-opacity=".62" fill="none">
+          <circle cx="19.5" cy="97" r="23" stroke-width="1.6"/>
+          <circle cx="19.5" cy="97" r="13" stroke-width=".9"/>
+          <path d="M44 89q7-4 14 0t14 0t14 0t14 0t14 0M44 97q7-4 14 0t14 0t14 0t14 0t14 0M44 105q7-4 14 0t14 0t14 0t14 0t14 0" stroke-width="1.4"/>
+          <g fill="#1c2030" fill-opacity=".62" stroke="none" font-family="Manrope, sans-serif" font-weight="700">
+            <text font-size="5.6" letter-spacing=".6"><textPath href="#pmArc" startOffset="50%" text-anchor="middle">STOCKHOLM</textPath></text>
+            <text x="19.5" y="99" text-anchor="middle" font-size="5.4">17.11.26</text>
+          </g>
+        </g>
+      </symbol>
+    </defs>
+  </svg>
+
+  <canvas id="ambient-snow" aria-hidden="true"></canvas>
+  <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+  <p id="draft-banner" class="draft-banner" role="status" hidden></p>
+
+  <main class="stage">
+    <header class="heading">
+      <p class="eyebrow">THS Armada</p>
+      <p class="title">Grand Banquet</p>
+    </header>
+
+    <button id="envelope" class="envelope-btn" type="button" aria-haspopup="dialog" aria-controls="invitation" aria-describedby="hint">
+      <span class="visually-hidden">Break the ice to open your invitation</span>
+      <span class="shaker">
+        <span class="envelope">
+          <span class="env-back"></span>
+
+          <span class="letter" aria-hidden="true">
+            <svg class="stamp letter-stamp" viewBox="0 0 100 124"><use href="#stamp" width="100" height="124"/></svg>
+            <span class="letter-kicker">You are invited</span>
+            <span class="letter-title" data-field="tagline"></span>
+          </span>
+
+          <svg class="env-front" viewBox="0 0 300 200" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0 0 L150 112 L0 200Z" fill="url(#paperL)"/>
+            <path d="M300 0 L150 112 L300 200Z" fill="url(#paperR)"/>
+            <path d="M0 200 L150 90 L300 200Z" fill="rgba(0,0,0,.28)"/>
+            <path d="M0 200 L150 96 L300 200Z" fill="url(#paperB)"/>
+            <path d="M0 200 L150 96 L300 200" fill="none" stroke="rgba(220,232,250,.14)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+            <!-- All three triangles wound the same way, so overlaps don't cancel out under the nonzero fill rule -->
+            <path d="M0 0 L150 112 L0 200Z M300 0 L300 200 L150 112Z M0 200 L150 96 L300 200Z" fill="#fff" filter="url(#grain)"/>
+          </svg>
+
+          <span class="env-flap">
+            <svg viewBox="0 0 300 118" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M0 0 H300 L158 111 Q150 117 142 111 Z" fill="url(#flapG)"/>
+              <path d="M0 0 L142 111 Q150 117 158 111 L300 0" fill="none" stroke="rgba(220,232,250,.18)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+              <path d="M0 0 H300 L158 111 Q150 117 142 111 Z" fill="#fff" filter="url(#grain)"/>
+            </svg>
+            <span class="seal" aria-hidden="true">
+              <svg viewBox="0 0 100 100">
+                <path d="M50 4C62 3 70 9 79 14C88 20 95 30 96 42C98 54 95 64 90 73C84 83 74 92 62 95C50 99 38 97 28 92C18 86 9 77 6 65C2 53 4 41 9 31C15 19 25 10 37 6C42 5 46 4 50 4Z" fill="url(#iceWax)"/>
+                <g clip-path="url(#sealClip)">
+                  <image href="assets/frost.webp" x="-25" y="-5" width="150" height="100" preserveAspectRatio="xMidYMid slice" opacity=".6"/>
+                  <path d="M6 40L30 21 52 30 72 10M30 21 34 50 10 72M52 30 61 55 94 47M34 50 61 55 74 88M61 55 47 98" fill="none" stroke="rgba(255,255,255,.4)" stroke-width=".8"/>
+                  <ellipse cx="34" cy="25" rx="24" ry="13" fill="url(#sealShine)"/>
+                </g>
+                <circle cx="50.8" cy="50.8" r="33" fill="none" stroke="rgba(30,70,120,.3)" stroke-width="2"/>
+                <circle cx="49.4" cy="49.4" r="33" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.2"/>
+                <use href="#ship" x="35.2" y="27.6" width="29.6" height="44.4" fill="rgba(255,255,255,.85)"/>
+                <use href="#ship" x="36" y="28.4" width="29.6" height="44.4" fill="#3d6a96"/>
+                <path d="M50 4C62 3 70 9 79 14C88 20 95 30 96 42C98 54 95 64 90 73C84 83 74 92 62 95C50 99 38 97 28 92C18 86 9 77 6 65C2 53 4 41 9 31C15 19 25 10 37 6C42 5 46 4 50 4Z" fill="none" stroke="rgba(255,255,255,.65)" stroke-width="1"/>
+              </svg>
+            </span>
+          </span>
+        </span>
+
+        <span class="ice" aria-hidden="true">
+          <span class="ice-frost"></span>
+          <span class="ice-shine"></span>
+          <svg class="cracks"></svg>
+        </span>
+      </span>
+    </button>
+
+    <p class="hint" id="hint" aria-live="polite"></p>
+  </main>
+
+  <canvas id="fx" aria-hidden="true"></canvas>
+
+  <dialog id="invitation" class="card" aria-labelledby="inv-title">
+    <div class="card-inner">
+      <button class="close" type="button" aria-label="Close invitation">&times;</button>
+      <svg class="ink-stamp card-stamp" viewBox="0 0 100 100" aria-hidden="true"><use href="#inkStamp" width="100" height="100"/></svg>
+      <p class="kicker reveal">You are cordially invited to</p>
+      <h1 id="inv-title" data-field="eventName"></h1>
+      <p class="tagline reveal" data-field="tagline"></p>
+
+      <div class="divider reveal" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+          <path d="M12 2v20M3.3 7l17.4 10M3.3 17l17.4-10M12 2l-2 2m2-2l2 2M12 22l-2-2m2 2l2-2"/>
+        </svg>
+      </div>
+
+      <p class="intro reveal" data-field="intro"></p>
+
+      <dl class="details">
+        <div class="reveal"><dt>Date</dt><dd data-field="date"></dd></div>
+        <div class="reveal">
+          <dt>Time</dt>
+          <dd>
+            <span data-field="time"></span>
+            <span class="tz" data-field="afterParty"></span>
+          </dd>
+        </div>
+        <div class="reveal">
+          <dt>Venue</dt>
+          <dd>
+            <span data-field="venueName"></span>
+            <a id="venue-map" class="venue-address" target="_blank" rel="noopener"><span data-field="venueAddress"></span></a>
+          </dd>
+        </div>
+        <div class="reveal"><dt>Dress code</dt><dd data-field="dressCode"></dd></div>
+      </dl>
+
+      <a id="ticket-link" class="cta reveal" target="_blank" rel="noopener">
+        <span data-field="ticketLabel"></span>
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg>
+      </a>
+      <p class="note reveal" data-field="dietaryNote"></p>
+      <p class="contact reveal">Questions? <a id="contact-link"><span data-field="contactEmail"></span></a></p>
+    </div>
+  </dialog>
+
+  <noscript><p class="noscript">Please enable JavaScript to open the invitation.</p></noscript>
+</body>
+</html>
