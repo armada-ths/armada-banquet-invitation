@@ -630,42 +630,13 @@ body.envelope-open .heading {
   color: #33415f;
 }
 
-.guest {
-  margin: 0 0 clamp(10px, 2.2svh, 22px);
+/* Special guest: its own centred row in the middle of the details */
+.details .wide {
+  grid-column: 1 / -1;
 }
 
-.guest p {
-  margin: 0;
-}
-
-.guest-label {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: clamp(2px, 0.6svh, 6px) !important;
-  font-family: var(--engraved);
-  font-weight: 600;
-  font-size: clamp(0.66rem, 1.6svh, 0.78rem);
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--accent);
-}
-
-.guest-label::before,
-.guest-label::after {
-  content: "";
-  width: 12px;
-  height: 1px;
-  background: currentColor;
-  opacity: 0.45;
-}
-
-.guest-name {
-  font-family: var(--display);
-  font-weight: 600;
+.details .guest-name {
   font-size: clamp(1.15rem, 2.9svh, 1.5rem);
-  line-height: 1.15;
 }
 
 .details {
@@ -796,9 +767,6 @@ a.venue-address[href] {
     margin: 6px auto;
   }
   .intro {
-    margin-bottom: 8px;
-  }
-  .guest {
     margin-bottom: 8px;
   }
 }
