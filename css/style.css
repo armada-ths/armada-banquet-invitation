@@ -588,6 +588,14 @@ body.envelope-open .heading {
   color: #7fa3d8;
 }
 
+.divider-flake {
+  flex: none;
+  width: clamp(24px, 4svh, 32px);
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 0 3px rgba(150, 200, 245, 0.55)) drop-shadow(0 1px 0 rgba(255, 255, 255, 0.8));
+}
+
 .divider::before,
 .divider::after {
   content: "";

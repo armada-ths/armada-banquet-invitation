@@ -69,6 +69,30 @@
         <stop offset="1" stop-color="#dcefff" stop-opacity="0"/>
       </radialGradient>
 
+      <!-- Divider snowflake: one dendrite arm, repeated six times around a hexagonal plate -->
+      <linearGradient id="flakeInk" gradientUnits="userSpaceOnUse" x1="-40" y1="-45" x2="40" y2="45">
+        <stop offset="0" stop-color="#9cc3ea"/><stop offset=".5" stop-color="#4a7fbf"/><stop offset="1" stop-color="#87b4e2"/>
+      </linearGradient>
+      <symbol id="snowflake" viewBox="-50 -50 100 100">
+        <g fill="none" stroke="url(#flakeInk)" stroke-linecap="round" stroke-linejoin="round">
+          <g id="flakeArm">
+            <path d="M0 -8V-46" stroke-width="2.6"/>
+            <path d="M0 -15L-8 -23M0 -15L8 -23" stroke-width="1.9"/>
+            <path d="M0 -24L-12.5 -35.5M0 -24L12.5 -35.5" stroke-width="1.7"/>
+            <path d="M-6 -29.5L-4.5 -36.5M6 -29.5L4.5 -36.5M-9.5 -32.8L-12.8 -29.2M9.5 -32.8L12.8 -29.2" stroke-width="1.1"/>
+            <path d="M0 -35.5L-6.5 -41.5M0 -35.5L6.5 -41.5" stroke-width="1.4"/>
+            <path d="M0 -48.5L-2.6 -44L0 -40.2L2.6 -44Z" fill="url(#flakeInk)" stroke-width="0.8"/>
+          </g>
+          <use href="#flakeArm" transform="rotate(60)"/>
+          <use href="#flakeArm" transform="rotate(120)"/>
+          <use href="#flakeArm" transform="rotate(180)"/>
+          <use href="#flakeArm" transform="rotate(240)"/>
+          <use href="#flakeArm" transform="rotate(300)"/>
+          <path d="M0 -8.5L7.4 -4.25V4.25L0 8.5L-7.4 4.25V-4.25Z" fill="rgba(255,255,255,.45)" stroke-width="1.5"/>
+          <path d="M0 -8.5V8.5M-7.4 -4.25L7.4 4.25M-7.4 4.25L7.4 -4.25" stroke-width="0.7" opacity=".55"/>
+        </g>
+      </symbol>
+
       <!-- The ship from the Armada logo (fill comes from the <use>) -->
       <symbol id="ship" viewBox="100 76 106 159">
         <path transform="matrix(1,0,0,-1,200.7193,169.0123)" d="M0 0-53.982-9.46C-53.982-9.46-55.708 13.104-39.611 42.005L5.27 45.278C5.27 45.278-19.931 18.692 0 0M-16.977-65.157H-58.333C-58.333-65.157-71.707-50.438-69.721-17.464L3.922-5.379C3.922-5.379 1.128-32.982-16.977-65.157M-73.752-11.826-100.07-1.187-73.433 68.541H-72.465ZM-38.134 92.552H-16.707C-16.707 92.552-21.268 71.355-18.912 48.821L-62.525 42.803C-62.525 42.803-52.425 73.371-38.134 92.552"/>
@@ -288,9 +312,7 @@
       <p class="tagline reveal" data-field="tagline"></p>
 
       <div class="divider reveal" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
-          <path d="M12 2v20M3.3 7l17.4 10M3.3 17l17.4-10M12 2l-2 2m2-2l2 2M12 22l-2-2m2 2l2-2"/>
-        </svg>
+        <svg class="divider-flake" viewBox="-50 -50 100 100" width="30" height="30"><use href="#snowflake"/></svg>
       </div>
 
       <p class="intro reveal" data-field="intro"></p>
