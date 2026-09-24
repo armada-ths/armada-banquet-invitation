@@ -1,9 +1,13 @@
-(function () {
+(async function () {
+  const access = await window.BANQUET_ACCESS?.ready;
+  if (!access?.granted) return;
+
   const cfg = window.INVITATION || {};
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const gsap = !reducedMotion && window.gsap ? window.gsap : null;
   const isPlaceholder = (v) => typeof v !== "string" || v.trim() === "" || v.startsWith("[NEEDS INPUT");
   const missing = new Set();
+  document.getElementById("invitee-name").textContent = access.name;
 
   function markMissing(el, key) {
     el.classList.add("needs-input");
@@ -105,12 +109,12 @@
 
     // Order: card rises, "Armada" is written, then "Grand Banquet", then the details,
     // and finally the stamp is scribbled in.
-    const kicker = dialog.querySelector(".kicker");
-    const details = [...dialog.querySelectorAll(".reveal")].filter((el) => el !== kicker);
+    const greeting = [dialog.querySelector(".recipient"), dialog.querySelector(".kicker")];
+    const details = [...dialog.querySelectorAll(".reveal")].filter((el) => !greeting.includes(el));
     const tl = (fullReveal = gsap.timeline());
     try {
       tl.fromTo(dialog, { opacity: 0, y: 90, scale: 0.88 }, { opacity: 1, y: 0, scale: 1, duration: 1.1, ease: "expo.out" }, 0)
-        .from(kicker, { opacity: 0, y: 10, duration: 0.7, ease: "power3.out" }, 0.25)
+        .from(greeting, { opacity: 0, y: 10, duration: 0.7, stagger: 0.1, ease: "power3.out" }, 0.25)
         .set(details, { opacity: 0, y: 16 }, 0)
         .set(".card-stamp .scribble", { strokeDashoffset: 100 }, 0);
       traceTitle(tl, 0.5);

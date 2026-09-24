@@ -30,6 +30,52 @@ body {
   min-height: 100%;
 }
 
+html.access-pending body > :not(#access-message):not(noscript),
+html.access-denied body > :not(#access-message):not(noscript) {
+  display: none !important;
+}
+
+.access-message {
+  position: relative;
+  z-index: 5;
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.access-message[hidden] {
+  display: none;
+}
+
+.access-message-card {
+  width: min(100%, 540px);
+  padding: clamp(28px, 7vw, 52px);
+  border: 1px solid rgba(207, 227, 255, 0.35);
+  border-radius: 20px;
+  background: rgba(11, 20, 51, 0.88);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  text-align: center;
+}
+
+.access-message-card h1 {
+  margin: 12px 0 18px;
+  font-family: var(--display);
+  font-size: clamp(2rem, 7vw, 3.4rem);
+  font-weight: 500;
+  line-height: 1.05;
+}
+
+.access-message-card p {
+  margin: 0;
+  color: var(--silver);
+  line-height: 1.6;
+}
+
+.access-message-card a {
+  color: var(--ice);
+}
+
 /* Rapid taps shouldn't trigger double-tap zoom (it breaks the animations).
    Pinch-zoom still works, so the page stays accessible. */
 html,
@@ -570,6 +616,14 @@ body.envelope-open .heading {
   letter-spacing: 0.26em;
   text-transform: uppercase;
   color: var(--muted);
+}
+
+.recipient {
+  margin: 0 0 clamp(4px, 1svh, 8px);
+  font-family: var(--display);
+  font-size: clamp(1.05rem, 2.8svh, 1.35rem);
+  font-style: italic;
+  color: #284c82;
 }
 
 /* Title: handwritten letters as SVG outlines (tools/make_title_svg.py), traced in on open. */

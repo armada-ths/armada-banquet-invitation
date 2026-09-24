@@ -1,0 +1,101 @@
+name: Deploy to GitHub Pages
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Validate and build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Check JavaScript syntax
+        run: node --check js/access-config.js && node --check js/access.js && node --check js/config.js && node --check js/snow.js && node --check js/fx.js && node --check js/envelope.js && node --check js/main.js
+
+      - name: Require the production access token
+        if: github.event_name != 'pull_request'
+        env:
+          BANQUET_ACCESS_TOKEN: ${{ secrets.BANQUET_ACCESS_TOKEN }}
+        run: |
+          if [[ -z "$BANQUET_ACCESS_TOKEN" ]]; then
+            echo "BANQUET_ACCESS_TOKEN is not configured."
+            exit 1
+          fi
+          if [[ ! "$BANQUET_ACCESS_TOKEN" =~ ^[A-Za-z0-9_-]{43,}$ ]]; then
+            echo "BANQUET_ACCESS_TOKEN must be a Base64URL token containing at least 32 random bytes."
+            exit 1
+          fi
+
+      - name: Build Pages artifact
+        env:
+          BANQUET_ACCESS_TOKEN: ${{ github.event_name == 'pull_request' && 'ci-validation-token-0123456789abcdefghijklmnop' || secrets.BANQUET_ACCESS_TOKEN }}
+        run: |
+          rsync -a \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude '.idea/' \
+            --exclude '.claude/' \
+            --exclude 'tools/' \
+            --exclude 'README.md' \
+            --exclude '_site/' \
+            ./ _site/
+          TOKEN_HASH="$(printf '%s' "$BANQUET_ACCESS_TOKEN" | sha256sum | cut -d ' ' -f 1)"
+          sed -i "s/__BANQUET_ACCESS_TOKEN_SHA256__/$TOKEN_HASH/" _site/js/access-config.js
+          test -f _site/index.html
+          test -f _site/CNAME
+          test -f _site/.nojekyll
+          if grep -R -qF '__BANQUET_ACCESS_TOKEN_SHA256__' _site; then
+            echo "The access hash placeholder remains in the artifact."
+            exit 1
+          fi
+          if grep -R -qF "$BANQUET_ACCESS_TOKEN" _site; then
+            echo "The raw access token was found in the artifact."
+            exit 1
+          fi
+          test ! -e _site/.github
+          test ! -e _site/tools
+
+      - name: Configure GitHub Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+
+      - name: Upload GitHub Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+          include-hidden-files: true
+
+  deploy:
+    name: Deploy
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
