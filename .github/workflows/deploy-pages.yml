@@ -62,8 +62,12 @@ jobs:
           test -f _site/index.html
           test -f _site/CNAME
           test -f _site/.nojekyll
-          if grep -R -qF '__BANQUET_ACCESS_TOKEN_SHA256__' _site; then
+          if grep -qF '__BANQUET_ACCESS_TOKEN_SHA256__' _site/js/access-config.js; then
             echo "The access hash placeholder remains in the artifact."
+            exit 1
+          fi
+          if ! grep -qF "$TOKEN_HASH" _site/js/access-config.js; then
+            echo "The configured access hash was not written to the artifact."
             exit 1
           fi
           if grep -R -qF "$BANQUET_ACCESS_TOKEN" _site; then
