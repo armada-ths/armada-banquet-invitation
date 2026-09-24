@@ -163,13 +163,14 @@ body::after {
   justify-content: center;
   gap: clamp(28px, 5svh, 48px);
   padding: 64px 16px 40px;
-  transition: transform 0.8s ease, opacity 0.8s ease, filter 0.8s ease;
+  transition: transform 0.8s ease, opacity 0.8s ease;
 }
 
+/* Dim (not blur) the scene behind the card: blurring the whole scene while the title is
+   being written made slow phones drop frames. */
 body.revealed .stage {
   transform: scale(0.94);
-  opacity: 0.25;
-  filter: blur(4px);
+  opacity: 0.2;
 }
 
 .heading {

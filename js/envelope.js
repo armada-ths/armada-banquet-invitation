@@ -137,15 +137,19 @@
       const py = keyboard ? rect.top + rect.height * (0.35 + Math.random() * 0.3) : e.clientY;
       const x = Math.min(Math.max(px, rect.left + 8), rect.right - 8);
       const y = Math.min(Math.max(py, rect.top + 8), rect.bottom - 8);
+      // Guard against a zero-sized box (mid-rotation, hidden tab) to avoid NaN geometry.
+      const fx = rect.width > 0 ? (x - rect.left) / rect.width : 0.5;
+      const fy = rect.height > 0 ? (y - rect.top) / rect.height : 0.5;
       return {
         page: { x, y },
-        local: { x: ((x - rect.left) / rect.width) * ice.offsetWidth, y: ((y - rect.top) / rect.height) * ice.offsetHeight },
+        local: { x: fx * ice.offsetWidth, y: fy * ice.offsetHeight },
       };
     }
 
     function drawCracks(p, level) {
       const w = ice.offsetWidth;
       const h = ice.offsetHeight;
+      if (!w || !h || !Number.isFinite(p.x) || !Number.isFinite(p.y)) return; // nothing to crack
       const diag = Math.hypot(w, h);
       cracksSvg.setAttribute("viewBox", `0 0 ${w} ${h}`);
       const defs = cracksSvg.querySelector("defs") || svgEl("defs", {}, cracksSvg);

@@ -85,9 +85,11 @@
       ctx.clip();
       ctx.fillStyle = "rgba(185, 215, 250, 0.32)";
       ctx.fill();
-      if (s.img && s.img.complete) {
+      if (s.tex) {
+        // only this shard's patch of the pre-rendered frost, not the whole image
+        const [bx, by, bw, bh] = s.bb;
         ctx.globalAlpha = fade * 0.7;
-        ctx.drawImage(s.img, s.rect.left, s.rect.top, s.rect.width, s.rect.height);
+        ctx.drawImage(s.tex, bx - s.rect.left, by - s.rect.top, bw, bh, bx, by, bw, bh);
       }
       ctx.restore();
 
@@ -110,6 +112,7 @@
 
   // Small flakes of frost that break loose and drift down.
   function dust(x, y, count, spread = 20) {
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return;
     for (let i = 0; i < count; i++) {
       particles.push({
         x: x + (Math.random() - 0.5) * spread,
@@ -129,6 +132,7 @@
 
   // Snow exploding outwards from a point.
   function burst(x, y, count) {
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return;
     for (let i = 0; i < count; i++) {
       const a = Math.random() * TAU;
       const speed = 150 + Math.random() * 650;
@@ -186,12 +190,22 @@
 
   // Break `rect` (page coords) into radial shards around `origin` and fling them.
   function shatter(rect, origin, img) {
+    if (!(rect.width > 0 && rect.height > 0) || !origin || !Number.isFinite(origin.x)) return;
     const diag = Math.hypot(rect.width, rect.height);
     const rays = 10 + Math.floor(Math.random() * 4);
     const angles = [];
     for (let i = 0; i < rays; i++) angles.push((i / rays) * TAU + (Math.random() - 0.5) * (TAU / rays) * 0.7);
     angles.sort((a, b) => a - b);
     const rings = [0, diag * 0.13, diag * 0.32, diag * 2];
+
+    // Render the frost texture once at the ice's size; shards sample small pieces of it.
+    let tex = null;
+    if (img && img.complete && img.naturalWidth) {
+      tex = document.createElement("canvas");
+      tex.width = Math.max(1, Math.round(rect.width));
+      tex.height = Math.max(1, Math.round(rect.height));
+      tex.getContext("2d").drawImage(img, 0, 0, tex.width, tex.height);
+    }
     const grid = rings.map((r) =>
       angles.map((a) => {
         const rr = r * (r ? 0.8 + Math.random() * 0.4 : 0);
@@ -210,8 +224,14 @@
         const dy = cy - origin.y;
         const d = Math.hypot(dx, dy) || 1;
         const speed = 220 + Math.random() * 380 + (1 - Math.min(d / diag, 1)) * 250;
+        const xs = poly.map((p) => p[0]);
+        const ys = poly.map((p) => p[1]);
+        const bx = Math.max(Math.floor(Math.min(...xs)), Math.ceil(rect.left));
+        const by = Math.max(Math.floor(Math.min(...ys)), Math.ceil(rect.top));
+        const bw = Math.max(1, Math.min(Math.ceil(Math.max(...xs)), Math.floor(rect.right)) - bx);
+        const bh = Math.max(1, Math.min(Math.ceil(Math.max(...ys)), Math.floor(rect.bottom)) - by);
         shards.push({
-          poly, cx, cy, x: cx, y: cy, rect, img,
+          poly, cx, cy, x: cx, y: cy, rect, tex, bb: [bx, by, bw, bh],
           vx: (dx / d) * speed + (Math.random() - 0.5) * 80,
           vy: (dy / d) * speed - 260 - Math.random() * 200,
           rot: 0,

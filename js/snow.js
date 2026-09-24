@@ -3,6 +3,8 @@
 (function () {
   const TAU = Math.PI * 2;
   const SPRITE = 96;
+  // Fewer, lower-resolution flakes on low-end phones so the animations stay smooth.
+  const LOW_END = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4;
 
   // One pre-rendered crystal. Each arm is identical, so the flake is symmetric.
   function makeCrystal(kind) {
@@ -143,12 +145,12 @@
 
     function resize() {
       const rect = canvas.getBoundingClientRect();
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      dpr = Math.min(window.devicePixelRatio || 1, LOW_END ? 1.5 : 2);
       w = rect.width;
       h = rect.height;
       canvas.width = Math.max(1, Math.round(w * dpr));
       canvas.height = Math.max(1, Math.round(h * dpr));
-      const target = Math.min(220, Math.round((w * h) / 8000));
+      const target = Math.round(Math.min(220, (w * h) / 8000) * (LOW_END ? 0.55 : 1));
       while (flakes.length < target) flakes.push(makeFlake(true));
       flakes.length = target;
       draw(0);

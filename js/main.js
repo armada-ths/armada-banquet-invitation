@@ -62,12 +62,17 @@
     lines.forEach((line, i) => {
       if (i > 0) t += 0.15; // brief lift of the pen between lines
       for (const path of line.querySelectorAll("path")) {
-        const len = path.getTotalLength();
+        let len = 0;
+        try { len = path.getTotalLength(); } catch { /* some engines refuse; fall back to a fade */ }
         const draw = Math.min(Math.max(len / 1300, 0.1), 0.35);
-        tl.fromTo(path,
-          { strokeDasharray: len, strokeDashoffset: len, fillOpacity: 0 },
-          { strokeDashoffset: 0, duration: draw, ease: "power1.inOut" }, t)
-          .to(path, { fillOpacity: 1, duration: 0.28, ease: "power1.out" }, t + draw * 0.7);
+        if (len > 0) {
+          tl.fromTo(path,
+            { strokeDasharray: len, strokeDashoffset: len, fillOpacity: 0 },
+            { strokeDashoffset: 0, duration: draw, ease: "power1.inOut" }, t);
+        } else {
+          tl.set(path, { fillOpacity: 0 }, 0);
+        }
+        tl.to(path, { fillOpacity: 1, duration: 0.28, ease: "power1.out" }, t + draw * 0.7);
         t += draw * 0.65; // overlap letters slightly so the writing flows
       }
     });
@@ -78,8 +83,17 @@
   // after closing just fades the card up with everything already written.
   let fullReveal = null;
 
+  // Put every animated element in its final, fully visible state.
+  function showEverything() {
+    gsap.set(dialog, { clearProps: "opacity,transform" });
+    gsap.set(dialog.querySelectorAll(".reveal, .kicker"), { clearProps: "opacity,transform" });
+    gsap.set(dialog.querySelectorAll(".title-art path"), { clearProps: "strokeDasharray,strokeDashoffset,fillOpacity" });
+    gsap.set(".card-stamp .scribble", { strokeDashoffset: 0 });
+  }
+
   function openCard() {
-    dialog.showModal();
+    if (dialog.showModal) dialog.showModal();
+    else dialog.setAttribute("open", ""); // very old browsers without <dialog> support
     document.body.classList.add("revealed");
     if (!gsap) return;
 
@@ -89,13 +103,12 @@
       return;
     }
 
-    {
-      // Order: card rises, "Armada" is written, then "Grand Banquet", then the details,
-      // and finally the stamp is scribbled in.
-      const kicker = dialog.querySelector(".kicker");
-      const details = [...dialog.querySelectorAll(".reveal")].filter((el) => el !== kicker);
-
-      const tl = (fullReveal = gsap.timeline());
+    // Order: card rises, "Armada" is written, then "Grand Banquet", then the details,
+    // and finally the stamp is scribbled in.
+    const kicker = dialog.querySelector(".kicker");
+    const details = [...dialog.querySelectorAll(".reveal")].filter((el) => el !== kicker);
+    const tl = (fullReveal = gsap.timeline());
+    try {
       tl.fromTo(dialog, { opacity: 0, y: 90, scale: 0.88 }, { opacity: 1, y: 0, scale: 1, duration: 1.1, ease: "expo.out" }, 0)
         .from(kicker, { opacity: 0, y: 10, duration: 0.7, ease: "power3.out" }, 0.25)
         .set(details, { opacity: 0, y: 16 }, 0)
@@ -103,7 +116,15 @@
       traceTitle(tl, 0.5);
       tl.to(details, { opacity: 1, y: 0, duration: 0.8, stagger: 0.07, ease: "power3.out" }, ">-0.15")
         .to(".card-stamp .scribble", { strokeDashoffset: 0, duration: 1, ease: "power1.inOut" }, ">-0.3");
+    } catch (err) {
+      // Never leave the card half-hidden because an animation couldn't be built.
+      console.error("Card reveal failed, showing it without animation:", err);
+      tl.kill();
+      showEverything();
+      return;
     }
+    // Safety net: if frames stall (low-power mode, busy phone), finish the reveal anyway.
+    setTimeout(() => { if (tl.progress() < 1) tl.progress(1); }, (tl.duration() + 1.5) * 1000);
   }
 
   createEnvelope(btn, {
@@ -132,11 +153,14 @@
     if (window.SplitText) {
       gsap.registerPlugin(SplitText);
       const split = SplitText.create(".title", { type: "chars" });
-      tl.from(split.chars, { opacity: 0, y: 34, rotateX: -70, filter: "blur(8px)", duration: 1.2, stagger: 0.045 }, "-=1.1");
+      // (no per-letter blur: animating filters is expensive on slow phones)
+      tl.from(split.chars, { opacity: 0, y: 34, rotateX: -70, duration: 1.2, stagger: 0.045 }, "-=1.1");
     } else {
       tl.from(".title", { opacity: 0, y: 24, duration: 1.2 }, "-=1.1");
     }
     tl.from(".envelope-btn", { opacity: 0, y: 50, scale: 0.94, duration: 1.4 }, "-=0.9")
       .from(".hint", { opacity: 0, duration: 0.8 }, "-=0.6");
+    // The envelope must never stay invisible, even if animation frames stall.
+    setTimeout(() => { if (tl.progress() < 1) tl.progress(1); }, (tl.duration() + 1.5) * 1000);
   }
 })();
