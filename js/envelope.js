@@ -107,6 +107,43 @@
     return toD(left.concat(right.reverse())) + "Z";
   }
 
+  // A crack plus its side branches (and their branches), like a real brittle fracture.
+  // Each entry: { pts, depth } where depth 0 is a main crack.
+  function fractureTree(x, y, angle, length, depth, out, maxDepth) {
+    const pts = crackLine(x, y, angle, length);
+    out.push({ pts, depth });
+    if (depth >= maxDepth) return;
+    const chance = depth === 0 ? 0.16 : 0.08;
+    let travelled = 0;
+    for (let i = 1; i < pts.length - 1; i++) {
+      travelled += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+      if (Math.random() > chance || travelled < 6) continue;
+      const [px, py] = pts[i - 1];
+      const dir = Math.atan2(pts[i][1] - py, pts[i][0] - px);
+      const turn = (Math.random() < 0.5 ? -1 : 1) * (0.35 + Math.random() * 0.5);
+      const rest = length - travelled;
+      fractureTree(pts[i][0], pts[i][1], dir + turn, rest * (0.3 + Math.random() * 0.3), depth + 1, out, maxDepth);
+    }
+  }
+
+  // Width that swells and narrows along a crack (for the fracture plane beside it).
+  function planeD(pts, maxW, side) {
+    const phase = Math.random() * TAU;
+    const out = [];
+    pts.forEach(([x, y], i) => {
+      const [ax, ay] = pts[Math.max(i - 1, 0)];
+      const [bx, by] = pts[Math.min(i + 1, pts.length - 1)];
+      const len = Math.hypot(bx - ax, by - ay) || 1;
+      const nx = (-(by - ay) / len) * side;
+      const ny = ((bx - ax) / len) * side;
+      const t = i / Math.max(pts.length - 1, 1);
+      const wobble = 0.55 + 0.45 * Math.sin(i * 0.9 + phase) * Math.sin(i * 0.37 + phase * 2);
+      const w = maxW * wobble * (1 - t * 0.7);
+      out.push([x + nx * w, y + ny * w]);
+    });
+    return toD(pts.concat(out.reverse())) + "Z";
+  }
+
   // Point roughly `r` along a crack from its start.
   function pointAt(pts, r) {
     let d = 0;
@@ -164,59 +201,107 @@
       const reach = [0.13, 0.28, 0.65][level - 1] * diag;
       const width = [1.6, 2.1, 2.6][level - 1];
       const offset = Math.random() * TAU;
+
+      // Layers, back to front. Blurred layers share one filter (much cheaper than per path).
+      const planes = svgEl("g", { class: "crack-planes", filter: "url(#crackBlur)" }, g);
+      const shadows = svgEl("g", { class: "crack-shadows" }, g);
+      const cores = svgEl("g", { class: "crack-cores" }, g);
+      const hackles = svgEl("g", { class: "crack-hackles" }, g);
+      const glints = svgEl("g", { class: "crack-glints", filter: "url(#glintBlur)" }, g);
+      const impact = svgEl("g", { class: "crack-impact" }, g);
+
+      // Main radial fractures, each with branches and sub-branches.
       const radials = [];
+      const cracks = [];
       for (let i = 0; i < rays; i++) {
         const a = offset + (i / rays) * TAU + (Math.random() - 0.5) * 0.45;
-        const pts = crackLine(p.x, p.y, a, reach * (0.55 + Math.random() * 0.6));
-        radials.push(pts);
-        if (level >= 2 && Math.random() < 0.35) {
-          const from = pts[Math.floor(pts.length * (0.4 + Math.random() * 0.35))];
-          const dir = a + (Math.random() < 0.5 ? -1 : 1) * (0.4 + Math.random() * 0.3);
-          radials.push(crackLine(from[0], from[1], dir, reach * 0.3));
+        const tree = [];
+        fractureTree(p.x, p.y, a, reach * (0.55 + Math.random() * 0.6), 0, tree, level >= 2 ? 2 : 1);
+        radials.push(tree[0].pts);
+        cracks.push(...tree);
+      }
+
+      for (const { pts, depth } of cracks) {
+        if (pts.length < 2) continue;
+        const d = toD(pts);
+        const side = Math.random() < 0.5 ? -1 : 1;
+        const w = width * [1, 0.6, 0.35][depth];
+        const brightness = (0.6 + Math.random() * 0.4) * [1, 0.85, 0.7][depth];
+
+        // Fracture plane: a translucent sheet beside the crack that swells and narrows.
+        if (depth < 2) svgEl("path", { d: planeD(pts, [7, 3.5][depth] * (0.6 + Math.random() * 0.6), side) }, planes);
+
+        // Shadowed edge, then the bright tapered crack itself.
+        const [x0, y0] = pts[0];
+        const [x1, y1] = pts[pts.length - 1];
+        const L = Math.hypot(x1 - x0, y1 - y0) || 1;
+        const sx = (y1 - y0) / L * side * 0.8;
+        const sy = -(x1 - x0) / L * side * 0.8;
+        svgEl("path", { d, transform: `translate(${sx.toFixed(1)} ${sy.toFixed(1)})`, opacity: brightness.toFixed(2) }, shadows);
+        svgEl("path", { d: taperedD(pts, w), opacity: brightness.toFixed(2) }, cores);
+
+        // Hackles: tiny feathery ticks along main cracks.
+        if (depth === 0) {
+          let next = 6 + Math.random() * 10;
+          let run = 0;
+          for (let k = 1; k < pts.length; k++) {
+            const [ax, ay] = pts[k - 1];
+            const [bx, by] = pts[k];
+            const seg = Math.hypot(bx - ax, by - ay);
+            run += seg;
+            if (run < next) continue;
+            next = run + 7 + Math.random() * 12;
+            const dir = Math.atan2(by - ay, bx - ax) + (Math.random() < 0.5 ? -1 : 1) * (0.9 + Math.random() * 0.4);
+            const hl = 1.5 + Math.random() * 3.5;
+            svgEl("path", { d: `M${bx.toFixed(1)} ${by.toFixed(1)}l${(Math.cos(dir) * hl).toFixed(1)} ${(Math.sin(dir) * hl).toFixed(1)}` }, hackles);
+          }
+          // A couple of short bright glints where the fracture catches the light.
+          for (let n = 0; n < 1 + Math.floor(Math.random() * 2); n++) {
+            const s0 = Math.floor(Math.random() * (pts.length - 1));
+            const s1 = Math.min(pts.length, s0 + 2);
+            svgEl("path", { d: toD(pts.slice(s0, s1)) }, glints);
+          }
         }
       }
 
-      function drawCrack(pts, tapered) {
-        const d = toD(pts);
-        const side = Math.random() < 0.5 ? -1 : 1;
-        const [x0, y0] = pts[0];
-        const [x1, y1] = pts[pts.length - 1];
-        const len = Math.hypot(x1 - x0, y1 - y0) || 1;
-        const nx = (-(y1 - y0) / len) * side;
-        const ny = ((x1 - x0) / len) * side;
-        // Fracture plane catching the light, a shadowed edge, then the bright crack itself.
-        svgEl("path", { d, class: "crack-plane", filter: "url(#crackBlur)", transform: `translate(${(nx * 2.5).toFixed(1)} ${(ny * 2.5).toFixed(1)})` }, g);
-        svgEl("path", { d, class: "crack-shadow", transform: `translate(${(-nx * 0.8).toFixed(1)} ${(-ny * 0.8).toFixed(1)})` }, g);
-        if (tapered) svgEl("path", { d: taperedD(pts, width), class: "crack-core" }, g);
-        else svgEl("path", { d, class: "crack-chord" }, g);
-      }
-
-      radials.forEach((pts) => drawCrack(pts, true));
-
-      // Concentric chords between neighbouring radials: the spider-web pattern.
+      // Concentric cracks between neighbouring radials (spider web): short, uneven, mostly
+      // straight segments at varying distances, so they never line up into a neat circle.
       const rings = level === 1 ? [] : level === 2 ? [0.35] : [0.22, 0.48];
       for (const frac of rings) {
         for (let i = 0; i < rays; i++) {
-          if (Math.random() < 0.3) continue;
-          const r = reach * frac * (0.85 + Math.random() * 0.3);
-          const a = pointAt(radials[i], r);
-          const b = pointAt(radials[(i + 1) % rays], r);
+          if (Math.random() < 0.4) continue;
+          const ra = reach * frac * (0.75 + Math.random() * 0.5);
+          const rb = ra * (0.8 + Math.random() * 0.4);
+          const a = pointAt(radials[i], ra);
+          const b = pointAt(radials[(i + 1) % rays], rb);
           if (!a || !b) continue;
-          const mid = [(a[0] + b[0]) / 2 + (Math.random() - 0.5) * 6, (a[1] + b[1]) / 2 + (Math.random() - 0.5) * 6];
-          drawCrack([a, mid, b], false);
+          const t = 0.35 + Math.random() * 0.3;
+          const kink = [a[0] + (b[0] - a[0]) * t + (Math.random() - 0.5) * 5, a[1] + (b[1] - a[1]) * t + (Math.random() - 0.5) * 5];
+          svgEl("path", { d: toD([a, kink, b]), class: "crack-chord", opacity: (0.45 + Math.random() * 0.5).toFixed(2) }, cores);
         }
       }
 
-      // Crushed, frosty spot where it was hit, with tiny micro-cracks.
-      svgEl("circle", { cx: p.x, cy: p.y, r: [6, 9, 13][level - 1], fill: "url(#bruiseGrad)" }, g);
-      for (let i = 0; i < 8 * level; i++) {
+      // Crushed impact: an irregular frosty patch with a nest of tiny cracks.
+      const R = [6, 9, 13][level - 1];
+      const blob = [];
+      for (let k = 0; k < 14; k++) {
+        const a = (k / 14) * TAU;
+        const rr = R * (0.65 + Math.random() * 0.6);
+        blob.push([p.x + Math.cos(a) * rr, p.y + Math.sin(a) * rr]);
+      }
+      svgEl("path", { d: toD(blob) + "Z", fill: "url(#bruiseGrad)" }, impact);
+      for (let i = 0; i < 12 * level; i++) {
         const a = Math.random() * TAU;
-        const r0 = Math.random() * 3;
-        const r1 = r0 + 2 + Math.random() * (4 + level * 2);
+        const r0 = Math.random() * R * 0.4;
+        const r1 = r0 + 2 + Math.random() * (R * 0.9);
+        const bend = a + (Math.random() - 0.5) * 0.5;
+        const mx = p.x + Math.cos(a) * (r0 + r1) / 2;
+        const my = p.y + Math.sin(a) * (r0 + r1) / 2;
         svgEl("path", {
-          d: `M${(p.x + Math.cos(a) * r0).toFixed(1)} ${(p.y + Math.sin(a) * r0).toFixed(1)}L${(p.x + Math.cos(a) * r1).toFixed(1)} ${(p.y + Math.sin(a) * r1).toFixed(1)}`,
+          d: `M${(p.x + Math.cos(a) * r0).toFixed(1)} ${(p.y + Math.sin(a) * r0).toFixed(1)}L${mx.toFixed(1)} ${my.toFixed(1)}L${(p.x + Math.cos(bend) * r1).toFixed(1)} ${(p.y + Math.sin(bend) * r1).toFixed(1)}`,
           class: "crack-micro",
-        }, g);
+          opacity: (0.4 + Math.random() * 0.6).toFixed(2),
+        }, impact);
       }
 
       const maxR = reach * 1.3;
