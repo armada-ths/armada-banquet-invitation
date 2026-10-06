@@ -14,14 +14,14 @@ window.INVITATION = {
   venueName: "Clarion Hotel Sign",
   venueAddress: "Östra Järnvägsgatan 35, Stockholm",
 
-  dressCode: "Black Tie",
+  dressCode: "Dark Suit",
 
   // Leave specialGuest empty ("") to hide the section.
   specialGuestLabel: "Special Guest",
   specialGuest: "Edward Blom",
 
   // Must be a full https:// link to the Ticketmaster registration page.
-  ticketUrl: "[NEEDS INPUT: Ticketmaster registration URL]",
+  ticketUrl: "https://www.universe.com/events/the-grand-armada-banquet-2026-tickets-8LN5P3?unii-trigger-open=8LN5P3",
   ticketLabel: "Register on Ticketmaster",
   dietaryNote: "Dietary requirements and guest details are collected when you register.",
 
