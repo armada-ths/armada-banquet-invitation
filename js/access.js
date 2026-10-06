@@ -44,9 +44,9 @@
   }
 
   function normalizeName(value) {
-    if (typeof value !== "string" || /\p{Cc}/u.test(value)) return "";
+    if (typeof value !== "string" || /\p{Cc}/u.test(value)) return null;
     const normalized = value.normalize("NFC").replace(/\s+/gu, " ").trim();
-    if (!normalized || [...normalized].length > 100) return "";
+    if ([...normalized].length > 100) return null;
     return normalized;
   }
 
@@ -63,7 +63,7 @@
     const name = normalizeName(nameValues[0]);
     return {
       present: true,
-      valid: accessValues[0].length > 0 && name.length > 0,
+      valid: accessValues[0].length > 0 && name !== null,
       token: accessValues[0],
       name,
     };
@@ -105,7 +105,7 @@
 
       const token = readCookie(COOKIE_NAME);
       const name = normalizeName(localStorage.getItem(NAME_STORAGE_KEY));
-      if (!name || !(await tokenIsValid(token))) return finishDenied();
+      if (name === null || !(await tokenIsValid(token))) return finishDenied();
       return finishGranted(name);
     } catch (error) {
       console.error("Invitation access check failed:", error);

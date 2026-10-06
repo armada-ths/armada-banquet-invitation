@@ -59,6 +59,12 @@ Production links contain a shared access token and the invitee's name in the URL
 https://banquet.armada.nu/#access=TOKEN&name=URL_ENCODED_NAME
 ```
 
+Keep the `name` parameter but leave its value empty to show a non-personalized invitation without the `Dear …,` line:
+
+```text
+https://banquet.armada.nu/#access=TOKEN&name=
+```
+
 The fragment is not sent to GitHub Pages. After a successful check, the page stores the token in a host-only cookie and the name in local storage, then removes the fragment from the address bar. The cookie expires at `2026-11-18T23:00:00Z` (midnight in Stockholm after 18 November). A later visit from the same browser therefore works without the fragment until that time.
 
 Always URL-encode the full name. For example, this browser-console snippet creates a link without modifying the token:

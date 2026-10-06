@@ -7,7 +7,9 @@
   const gsap = !reducedMotion && window.gsap ? window.gsap : null;
   const isPlaceholder = (v) => typeof v !== "string" || v.trim() === "" || v.startsWith("[NEEDS INPUT");
   const missing = new Set();
-  document.getElementById("invitee-name").textContent = access.name;
+  const recipient = document.querySelector(".recipient");
+  if (access.name) document.getElementById("invitee-name").textContent = access.name;
+  else recipient.remove();
 
   function markMissing(el, key) {
     el.classList.add("needs-input");
@@ -109,7 +111,7 @@
 
     // Order: card rises, "Armada" is written, then "Grand Banquet", then the details,
     // and finally the stamp is scribbled in.
-    const greeting = [dialog.querySelector(".recipient"), dialog.querySelector(".kicker")];
+    const greeting = [dialog.querySelector(".recipient"), dialog.querySelector(".kicker")].filter(Boolean);
     const details = [...dialog.querySelectorAll(".reveal")].filter((el) => !greeting.includes(el));
     const tl = (fullReveal = gsap.timeline());
     try {
