@@ -53,17 +53,20 @@ The full opening (breaking the ice, handwriting, stamp) plays on every page load
 
 ## Invitation links and access
 
-Production links contain a shared access token and the invitee's name in the URL fragment:
+Production links contain a shared access token and can include the invitee's name in the URL fragment:
 
 ```text
 https://banquet.armada.nu/#access=TOKEN&name=URL_ENCODED_NAME
 ```
 
-Keep the `name` parameter but leave its value empty to show a non-personalized invitation without the `Dear …,` line:
+Omit the `name` parameter, or leave its value empty, to show a non-personalized invitation without the `Dear …,` line:
 
 ```text
+https://banquet.armada.nu/#access=TOKEN
 https://banquet.armada.nu/#access=TOKEN&name=
 ```
+
+Names that contain no letters or digits are also treated as empty. For example, `name=+` does not render a name if an email service's name substitution fails.
 
 The fragment is not sent to GitHub Pages. After a successful check, the page stores the token in a host-only cookie and the name in local storage, then removes the fragment from the address bar. The cookie expires at `2026-11-18T23:00:00Z` (midnight in Stockholm after 18 November). A later visit from the same browser therefore works without the fragment until that time.
 

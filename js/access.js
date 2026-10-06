@@ -47,6 +47,7 @@
     if (typeof value !== "string" || /\p{Cc}/u.test(value)) return null;
     const normalized = value.normalize("NFC").replace(/\s+/gu, " ").trim();
     if ([...normalized].length > 100) return null;
+    if (normalized && !/[\p{L}\p{N}]/u.test(normalized)) return "";
     return normalized;
   }
 
@@ -58,9 +59,9 @@
     const containsInvitationField = accessValues.length > 0 || nameValues.length > 0;
 
     if (!containsInvitationField) return { present: false };
-    if (accessValues.length !== 1 || nameValues.length !== 1) return { present: true, valid: false };
+    if (accessValues.length !== 1 || nameValues.length > 1) return { present: true, valid: false };
 
-    const name = normalizeName(nameValues[0]);
+    const name = normalizeName(nameValues[0] ?? "");
     return {
       present: true,
       valid: accessValues[0].length > 0 && name !== null,
