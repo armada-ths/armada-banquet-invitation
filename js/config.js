@@ -22,7 +22,7 @@ window.INVITATION = {
 
   // Must be a full https:// link to the Universe registration page.
   ticketUrl: "https://www.universe.com/events/the-grand-armada-banquet-2026-tickets-8LN5P3?unii-trigger-open=8LN5P3",
-  ticketLabel: "Register on Universe",
+  ticketLabel: "Register here",
   dietaryNote: "Dietary requirements and guest details are collected when you register.",
 
   contactEmail: "maria.alnajem@armada.nu",
