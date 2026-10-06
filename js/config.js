@@ -12,7 +12,7 @@ window.INVITATION = {
   afterParty: "After party until 01:00",
 
   venueName: "Clarion Hotel Sign",
-  venueAddress: "Östra Järnvägsgatan 35, Stockholm",
+  venueAddress: "Östra Järnvägsgatan 37, Stockholm",
 
   dressCode: "Dark Suit",
 
@@ -22,7 +22,7 @@ window.INVITATION = {
 
   // Must be a full https:// link to the Universe registration page.
   ticketUrl: "https://www.universe.com/events/the-grand-armada-banquet-2026-tickets-8LN5P3?unii-trigger-open=8LN5P3",
-  ticketLabel: "Register here",
+  ticketLabel: "Reserve Your Seat",
   dietaryNote: "Dietary requirements and guest details are collected when you register.",
 
   contactEmail: "maria.alnajem@armada.nu",
