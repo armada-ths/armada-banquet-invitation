@@ -5,6 +5,7 @@
   const NAME_STORAGE_KEY = "armada_banquet_invitee_name";
   const CONFIG_PLACEHOLDER = "__BANQUET_ACCESS_TOKEN_SHA256__";
   const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
+  const NAME_SUBSTITUTION_PATTERN = /\$(?:RECEIVER_FIRST_NAME|RECEIVER_LAST_NAME|RECEIVER_NAME|RECEIVER_EMAIL|COMPANY)/gu;
   const config = window.BANQUET_ACCESS_CONFIG || {};
 
   function finishDenied() {
@@ -45,7 +46,11 @@
 
   function normalizeName(value) {
     if (typeof value !== "string" || /\p{Cc}/u.test(value)) return null;
-    const normalized = value.normalize("NFC").replace(/\s+/gu, " ").trim();
+    const normalized = value
+      .replace(NAME_SUBSTITUTION_PATTERN, " ")
+      .normalize("NFC")
+      .replace(/\s+/gu, " ")
+      .trim();
     if ([...normalized].length > 100) return null;
     if (normalized && !/[\p{L}\p{N}]/u.test(normalized)) return "";
     return normalized;

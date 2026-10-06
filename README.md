@@ -40,16 +40,16 @@ The full opening (breaking the ice, handwriting, stamp) plays on every page load
 
 ## Files
 
-| Path | Purpose |
-| --- | --- |
-| `index.html` | Markup: envelope, seal, ice, invitation card |
-| `css/style.css` | Theme, envelope, ice, card |
-| `js/config.js` | All event text and links |
-| `js/envelope.js` | Tap logic: spring-based shake, cracks, shatter/open sequence |
-| `js/fx.js` | Effects canvas: frost dust, snow burst, flying ice shards |
-| `js/snow.js` | Background snowfall: crystal snowflakes up close, soft specks in the distance |
-| `js/main.js` | Fills in the config, load-in animation, card open/close |
-| `assets/frost.webp` | Frost texture (see credits) |
+| Path                | Purpose                                                                       |
+| ------------------- | ----------------------------------------------------------------------------- |
+| `index.html`        | Markup: envelope, seal, ice, invitation card                                  |
+| `css/style.css`     | Theme, envelope, ice, card                                                    |
+| `js/config.js`      | All event text and links                                                      |
+| `js/envelope.js`    | Tap logic: spring-based shake, cracks, shatter/open sequence                  |
+| `js/fx.js`          | Effects canvas: frost dust, snow burst, flying ice shards                     |
+| `js/snow.js`        | Background snowfall: crystal snowflakes up close, soft specks in the distance |
+| `js/main.js`        | Fills in the config, load-in animation, card open/close                       |
+| `assets/frost.webp` | Frost texture (see credits)                                                   |
 
 ## Invitation links and access
 
@@ -67,6 +67,8 @@ https://banquet.armada.nu/#access=TOKEN&name=
 ```
 
 Names that contain no letters or digits are also treated as empty. For example, `name=+` does not render a name if an email service's name substitution fails.
+
+Unresolved email substitution variables are removed wherever they occur in the name: `$RECEIVER_NAME`, `$RECEIVER_FIRST_NAME`, `$RECEIVER_LAST_NAME`, `$RECEIVER_EMAIL`, and `$COMPANY`. If nothing remains, the invitation is non-personalized.
 
 The fragment is not sent to GitHub Pages. After a successful check, the page stores the token in a host-only cookie and the name in local storage, then removes the fragment from the address bar. The cookie expires at `2026-11-18T23:00:00Z` (midnight in Stockholm after 18 November). A later visit from the same browser therefore works without the fragment until that time.
 
