@@ -14,6 +14,8 @@ Plain HTML, CSS and JavaScript, with no build step. [GSAP](https://gsap.com) (fr
 
 Edit `js/config.js`. Any value still starting with `[NEEDS INPUT` shows a red dashed outline on the page, and a red "Draft" banner counts how many are left.
 
+`ticketUrl` is the registration link for other guests and is the default. Set `companyTicketUrl` to the full HTTPS registration link for company representatives. Until it is filled in, company invitations have a disabled registration link and show the draft warning; they never fall back to guest registration.
+
 The Armada logo is in `assets/armada-logo.svg`. Its ship shape is also reused inline in `index.html`, in the ice seal and the postage stamp.
 
 The card's title is handwritten in frosted ice-blue ink (Mrs Saint Delafield). The card also carries an icy ink stamp of the Armada logo, the `inkStamp` symbol in `index.html`.
@@ -59,6 +61,15 @@ Production links contain a shared access token and can include the invitee's nam
 https://banquet.armada.nu/#access=TOKEN&name=URL_ENCODED_NAME
 ```
 
+Select the registration link with `audience` in the same fragment:
+
+```text
+https://banquet.armada.nu/#access=TOKEN&name=URL_ENCODED_NAME&audience=company
+https://banquet.armada.nu/#access=TOKEN&name=URL_ENCODED_NAME&audience=guest
+```
+
+Missing or empty `audience` defaults to other guests. Unknown or duplicate audience values invalidate the invitation. This selector chooses a link, not an authorization level.
+
 Omit the `name` parameter, or leave its value empty, to show a non-personalized invitation without the `Dear …,` line:
 
 ```text
@@ -70,7 +81,7 @@ Names that contain no letters or digits are also treated as empty. For example, 
 
 Unresolved email substitution variables are removed wherever they occur in the name: `$RECEIVER_NAME`, `$RECEIVER_FIRST_NAME`, `$RECEIVER_LAST_NAME`, `$RECEIVER_EMAIL`, and `$COMPANY`. If nothing remains, the invitation is non-personalized.
 
-The fragment is not sent to GitHub Pages. After a successful check, the page stores the token in a host-only cookie and the name in local storage, then removes the fragment from the address bar. The cookie expires at `2026-11-18T23:00:00Z` (midnight in Stockholm after 18 November). A later visit from the same browser therefore works without the fragment until that time.
+The fragment is not sent to GitHub Pages. After a successful check, the page stores the token in a host-only cookie and the name and audience in local storage, then removes the fragment from the address bar. The cookie expires at `2026-11-18T23:00:00Z` (midnight in Stockholm after 18 November). A later visit from the same browser therefore works without the fragment until that time. Opening a new invitation without `audience` resets the selection to other guests.
 
 Always URL-encode the full name. For example, this browser-console snippet creates a link without modifying the token:
 
@@ -104,6 +115,8 @@ openssl rand -base64 32 | tr '+/' '-_' | tr -d '=\n'
 In the repository, open **Settings → Secrets and variables → Actions**, create a repository secret named `BANQUET_ACCESS_TOKEN`, and paste the generated value. Rotating the token means replacing that secret, redeploying the workflow, and issuing new links. Previously stored cookies stop working as soon as the new deployment is live.
 
 ## GitHub Pages deployment
+
+Run the invitation link tests locally with `node --test tools/invitation-links.test.cjs`. The deployment workflow runs them before building the artifact.
 
 `.github/workflows/deploy-pages.yml` validates every pull request but only deploys pushes to `main` or manual workflow runs. During a production build it hashes `BANQUET_ACCESS_TOKEN`, injects only the hash into the static artifact, verifies that the raw token is absent, and publishes through GitHub Pages.
 

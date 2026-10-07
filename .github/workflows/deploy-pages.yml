@@ -30,6 +30,9 @@ jobs:
       - name: Check JavaScript syntax
         run: node --check js/access-config.js && node --check js/access.js && node --check js/config.js && node --check js/snow.js && node --check js/fx.js && node --check js/envelope.js && node --check js/main.js
 
+      - name: Test invitation links
+        run: node --test tools/invitation-links.test.cjs
+
       - name: Require the production access token
         if: github.event_name != 'pull_request'
         env:

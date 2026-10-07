@@ -28,12 +28,14 @@
   });
 
   const ticket = document.getElementById("ticket-link");
-  if (isPlaceholder(cfg.ticketUrl) || !/^https:\/\//i.test(cfg.ticketUrl)) {
+  const ticketKey = access.audience === "company" ? "companyTicketUrl" : "ticketUrl";
+  const ticketUrl = cfg[ticketKey];
+  if (isPlaceholder(ticketUrl) || !/^https:\/\//i.test(ticketUrl)) {
     ticket.removeAttribute("href");
     ticket.setAttribute("aria-disabled", "true");
-    markMissing(ticket, "ticketUrl");
+    markMissing(ticket, ticketKey);
   } else {
-    ticket.href = cfg.ticketUrl;
+    ticket.href = ticketUrl;
   }
 
   const map = document.getElementById("venue-map");

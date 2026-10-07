@@ -3,6 +3,7 @@
 
   const COOKIE_NAME = "armada_banquet_access";
   const NAME_STORAGE_KEY = "armada_banquet_invitee_name";
+  const AUDIENCE_STORAGE_KEY = "armada_banquet_audience";
   const CONFIG_PLACEHOLDER = "__BANQUET_ACCESS_TOKEN_SHA256__";
   const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
   const NAME_SUBSTITUTION_PATTERN = /\$(?:RECEIVER_FIRST_NAME|RECEIVER_LAST_NAME|RECEIVER_NAME|RECEIVER_EMAIL|COMPANY)/gu;
@@ -10,6 +11,7 @@
 
   function finishDenied() {
     try { localStorage.removeItem(NAME_STORAGE_KEY); } catch { /* storage may be disabled */ }
+    try { localStorage.removeItem(AUDIENCE_STORAGE_KEY); } catch { /* storage may be disabled */ }
     document.cookie = `${COOKIE_NAME}=; Path=/; Max-Age=0; SameSite=Lax`;
     document.documentElement.classList.remove("access-pending");
     document.documentElement.classList.add("access-denied");
@@ -18,9 +20,9 @@
     return { granted: false, name: "" };
   }
 
-  function finishGranted(name) {
+  function finishGranted(name, audience) {
     document.documentElement.classList.remove("access-pending", "access-denied");
-    return { granted: true, name };
+    return { granted: true, name, audience };
   }
 
   function clearFragment() {
@@ -61,17 +63,20 @@
     const params = new URLSearchParams(window.location.hash.slice(1));
     const accessValues = params.getAll("access");
     const nameValues = params.getAll("name");
-    const containsInvitationField = accessValues.length > 0 || nameValues.length > 0;
+    const audienceValues = params.getAll("audience");
+    const containsInvitationField = accessValues.length > 0 || nameValues.length > 0 || audienceValues.length > 0;
 
     if (!containsInvitationField) return { present: false };
-    if (accessValues.length !== 1 || nameValues.length > 1) return { present: true, valid: false };
+    if (accessValues.length !== 1 || nameValues.length > 1 || audienceValues.length > 1) return { present: true, valid: false };
 
     const name = normalizeName(nameValues[0] ?? "");
+    const audience = audienceValues[0] || "guest";
     return {
       present: true,
-      valid: accessValues[0].length > 0 && name !== null,
+      valid: accessValues[0].length > 0 && name !== null && (audience === "guest" || audience === "company"),
       token: accessValues[0],
       name,
+      audience,
     };
   }
 
@@ -106,13 +111,15 @@
 
         writeAccessCookie(invitation.token, config.expiresAt);
         localStorage.setItem(NAME_STORAGE_KEY, invitation.name);
-        return finishGranted(invitation.name);
+        localStorage.setItem(AUDIENCE_STORAGE_KEY, invitation.audience);
+        return finishGranted(invitation.name, invitation.audience);
       }
 
       const token = readCookie(COOKIE_NAME);
       const name = normalizeName(localStorage.getItem(NAME_STORAGE_KEY));
       if (name === null || !(await tokenIsValid(token))) return finishDenied();
-      return finishGranted(name);
+      const audience = localStorage.getItem(AUDIENCE_STORAGE_KEY) === "company" ? "company" : "guest";
+      return finishGranted(name, audience);
     } catch (error) {
       console.error("Invitation access check failed:", error);
       clearFragment();

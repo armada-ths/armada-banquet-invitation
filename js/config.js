@@ -22,6 +22,8 @@ window.INVITATION = {
 
   // Must be a full https:// link to the Universe registration page.
   ticketUrl: "https://www.universe.com/events/the-grand-armada-banquet-2026-tickets-8LN5P3?unii-trigger-open=8LN5P3",
+  // Used only for audience=company. Fill in the company representatives' link.
+  companyTicketUrl: "https://www.universe.com/events/the-grand-armada-banquet-2026-tickets-5DQ610?unii-trigger-open=5DQ610",
   ticketLabel: "Reserve Your Seat",
   dietaryNote: "Dietary requirements and guest details are collected when you register.",
 
